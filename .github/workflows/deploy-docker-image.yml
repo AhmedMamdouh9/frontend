@@ -31,13 +31,13 @@ jobs:
       - name: Debug SSH Connection
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com 'echo "SSH connection successful"'
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-23-21-16-207.compute-1.amazonaws.com 'echo "SSH connection successful"'
 
       # Prepare the SSH private key and install Docker if not already installed on the EC2 instance
       - name: Install Docker (if not installed)
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "if ! command -v docker &> /dev/null; then
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-23-21-16-207.compute-1.amazonaws.com "if ! command -v docker &> /dev/null; then
               sudo apt-get update &&
               sudo apt-get install -y docker.io &&
               sudo systemctl start docker &&
@@ -48,10 +48,10 @@ jobs:
       - name: Stop current Uptime Kuma container
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "sudo docker stop uptime-kuma || true && sudo docker rm uptime-kuma || true"
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-23-21-16-207.compute-1.amazonaws.com "sudo docker stop uptime-kuma || true && sudo docker rm uptime-kuma || true"
 
       # Prepare the SSH private key and deploy a new Uptime Kuma container
       - name: Deploy new Uptime Kuma container
         run: |
           echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "sudo docker run -d --name uptime-kuma -p 3001:3001 -v ./data:/app/data louislam/uptime-kuma:latest"
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-23-21-16-207.compute-1.amazonaws.com "sudo docker run -d --name uptime-kuma -p 3001:3001 -v ./data:/app/data louislam/uptime-kuma:latest"

@@ -1,0 +1,57 @@
+name: Uptime Kuma
+
+on:
+  push:
+    branches:
+      - main  # This will trigger the workflow on updates to the main branch
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # The build job will run on the latest version of Ubuntu
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Step to checkout the repository code
+
+      - name: Build the project
+        run: |
+          echo "Building the project..."  # Print a message to indicate the build process
+          npm install && npm run build  # Install dependencies and build the project
+
+  deploy:
+    runs-on: ubuntu-latest  # The deploy job will also run on the latest version of Ubuntu
+    needs: build  # This job depends on the successful completion of the build job
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Step to checkout the repository code again for the deploy job
+
+      # Prepare the SSH private key and test SSH connection to the EC2 instance
+      - name: Debug SSH Connection
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com 'echo "SSH connection successful"'
+
+      # Prepare the SSH private key and install Docker if not already installed on the EC2 instance
+      - name: Install Docker (if not installed)
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "if ! command -v docker &> /dev/null; then
+              sudo apt-get update &&
+              sudo apt-get install -y docker.io &&
+              sudo systemctl start docker &&
+              sudo systemctl enable docker;
+          fi"
+
+      # Prepare the SSH private key and stop and remove the current Uptime Kuma container if it exists
+      - name: Stop current Uptime Kuma container
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "sudo docker stop uptime-kuma || true && sudo docker rm uptime-kuma || true"
+
+      # Prepare the SSH private key and deploy a new Uptime Kuma container
+      - name: Deploy new Uptime Kuma container
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-52-90-23-127.compute-1.amazonaws.com "sudo docker run -d --name uptime-kuma -p 3001:3001 -v ./data:/app/data louislam/uptime-kuma:latest"

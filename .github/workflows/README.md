@@ -1,6 +1,5 @@
 ![GitHub Actions](https://github.com/AhmedMamdouh9/frontend/actions/workflows/deploy.yml/badge.svg)
 
-
 # GitHub Actions Workflow for Uptime Kuma
 
 ![github_action](https://github.com/user-attachments/assets/f33d0203-0234-49b2-a2d2-8603cf170a49)

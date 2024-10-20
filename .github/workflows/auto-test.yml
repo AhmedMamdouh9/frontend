@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest, ARM64]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         node: [ 18, 20 ]
 
     steps:
@@ -45,26 +45,6 @@ jobs:
         HEADLESS_TEST: 1
         JUST_FOR_TEST: ${{ secrets.JUST_FOR_TEST }}
 
-  armv7-simple-test:
-    needs: [ ]
-    runs-on: ARMv7
-    timeout-minutes: 15
-    if: ${{ github.repository == 'louislam/uptime-kuma' }}
-    strategy:
-      matrix:
-        node: [ 18, 20 ]
-
-    steps:
-      - run: git config --global core.autocrlf false  # Mainly for Windows
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-
-      - run: npm ci --production
-
   check-linters:
     runs-on: ubuntu-latest
 
@@ -82,7 +62,7 @@ jobs:
 
   e2e-test:
     needs: [ ]
-    runs-on: ARM64
+    runs-on: ubuntu-latest
     steps:
     - run: git config --global core.autocrlf false  # Mainly for Windows
     - uses: actions/checkout@v4
